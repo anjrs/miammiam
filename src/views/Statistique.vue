@@ -97,9 +97,9 @@ console.log("Items trouvés:", this.getOrderItems(commande));
     <div class="statistiques-container">
       <p>Total des ventes : {{ totalVentes.toFixed(2) }} Ar</p>
       <p>Nombre de commandes payées : {{ totalCommandesPaid }}</p>
-      <p>Nombre total de plats vendus/servis : {{ totalPlats }}</p>
+      <p>Nombre total de plats servis : {{ totalPlats }}</p>
       
-      <!-- <Bar :data="filteredDataChart" /> -->
+      <Bar :data="filteredDataChart" />
     </div>
   </div>
 </template>

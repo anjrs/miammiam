@@ -11,7 +11,9 @@ export default {
       <li><router-link to="/plats">Liste des plats</router-link></li>
       <li><router-link to="/statistique">Statistiques</router-link></li>
       <li><router-link to="/clients">Clients</router-link></li>
-      <li><router-link to="/commandes">Commandes</router-link></li>
+      <li><router-link to="/historique">Historique des commandes</router-link></li>
+      <li><router-link to="/cooking">Commandes en cours</router-link></li>
+
     </ul>
   </nav>
 </template>

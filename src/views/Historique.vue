@@ -4,7 +4,7 @@ import Header from '../components/Header.vue';
 import Commande from '../components/Commande.vue';
 
 export default {
-  name: "ListeCommande",
+  name: "Historique",
   components: {
     Commande,
     Header,
