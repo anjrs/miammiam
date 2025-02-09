@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
 import ListePlats from "../views/ListePlats.vue";
+
+import Clients from "../views/Clients.vue";
 import Update_Plat from "../views/Update_plat.vue";
 import Create_Plat from "../views/Create_Plat.vue";
 import Statistique from "../views/Statistique.vue";
@@ -11,6 +13,7 @@ import ListeCommande from "../views/ListeCommande.vue";
 const routes = [
   { path: "/", name: "Login", component: Login }, // Page d'accueil = Login
   { path: "/plats", name: "ListePlats", component: ListePlats },
+  { path: "/clients", name: "Clients", component: Clients },
   { path: "/commandes", name: "ListeCommande", component: ListeCommande },
   { path: "/statistique", name: "Statistique", component: Statistique },
   { path: "/stocks", name: "Stocks", component: Stocks },

@@ -10,7 +10,8 @@ export default {
       <li><router-link to="/stocks">Stocks</router-link></li>
       <li><router-link to="/plats">Liste des plats</router-link></li>
       <li><router-link to="/statistique">Statistiques</router-link></li>
-      <li><router-link to="/commandes">Commandes en cours</router-link></li>
+      <li><router-link to="/clients">Clients</router-link></li>
+      <li><router-link to="/commandes">Commandes</router-link></li>
     </ul>
   </nav>
 </template>

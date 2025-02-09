@@ -15,11 +15,18 @@ export default {
   data() {
     return {
       commandes: [],
+      orderItems: [],
       totalVentes: 0,
       totalPlats: 0,
       totalCommandesPaid: 0,
-      selectedYear: new Date().getFullYear(),
-      monthlyData: Array(12).fill(0)
+      filteredDataChart: {
+        labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"],
+        datasets: [{
+          label: 'Nombre de plats servis',
+          backgroundColor: '#42A5F5',
+          data: new Array(12).fill(0)
+        }]
+      }
     };
   },
   mounted() {
@@ -28,48 +35,60 @@ export default {
   methods: {
     async fetchCommandes() {
       try {
-        const commandesResponse = await axios.get("https://miammiam3-production.up.railway.app/api/orders");
-        const orderItemsResponse = await axios.get("https://miammiam3-production.up.railway.app/api/order_items");
+        console.log("Chargement des données...");
+        const [commandesResponse, orderItemsResponse] = await Promise.all([
+          axios.get("https://miammiam3-production.up.railway.app/api/orders"),
+          axios.get("https://miammiam3-production.up.railway.app/api/order_items")
+        ]);
 
-        this.commandes = commandesResponse.data.member;
-        const orderItems = orderItemsResponse.data.member;
+        this.commandes = commandesResponse.data.member || [];
+        this.orderItems = orderItemsResponse.data.member || [];
+
+        console.log("Commandes récupérées :", this.commandes.length);
+        console.log("Détails de commandes récupérés :", this.orderItems.length);
 
         this.totalVentes = this.commandes
           .filter(commande => commande.status === 'paid')
-          .reduce((total, commande) => total + parseFloat(commande.totalAmount), 0);
+          .reduce((total, commande) => total + parseFloat(commande.totalAmount || 0), 0);
 
         this.totalCommandesPaid = this.commandes.filter(commande => commande.status === 'paid').length;
 
-        this.totalPlats = orderItems.reduce((total, item) => total + item.quantity, 0);
+        this.totalPlats = this.orderItems.reduce((total, item) => total + (item.quantity || 0), 0);
 
-        this.updateMonthlyData();
+        this.filterData();
       } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
+        console.error('Erreur lors du chargement des données:', error.response || error);
       }
     },
-    updateMonthlyData() {
-      const monthlyData = Array(12).fill(0);
+    filterData() {
+      const monthlyData = new Array(12).fill(0);
+
       this.commandes.forEach(commande => {
-        const date = new Date(commande.createdAt);
-        if (date.getFullYear() === this.selectedYear) {
-          const month = date.getMonth();
-          const orderItems = this.getOrderItems(commande);
-          monthlyData[month] += orderItems.reduce((total, item) => total + item.quantity, 0);
+        if (commande.status === 'paid' && commande.createdAt) {
+          const date = new Date(commande.createdAt);
+          if (!isNaN(date.getTime()) && date.getFullYear() === 2025) {
+            const monthIndex = date.getMonth();
+            monthlyData[monthIndex] += this.getOrderItems(commande).reduce((total, item) => total + (item.quantity || 0), 0);
+          }
         }
       });
-      this.monthlyData = monthlyData;
+
+      this.filteredDataChart.datasets[0].data = monthlyData;
     },
     getOrderItems(commande) {
-      return this.orderItems[commande['@id']] || [];
-    }
-  },
-  watch: {
-    selectedYear() {
-      this.updateMonthlyData();
-    }
+  return this.orderItems.filter(item => {
+    const itemCommandeId = parseInt(item.commande.split("/").pop(), 10); // Extrait l'ID de la chaîne
+    return itemCommandeId === commande.id;
+  }) || [];
+  console.log("Commande ID:", commande.id);
+console.log("Items trouvés:", this.getOrderItems(commande));
+
+}
+
   }
 };
 </script>
+
 
 <template>
   <div>
@@ -79,18 +98,8 @@ export default {
       <p>Total des ventes : {{ totalVentes.toFixed(2) }} Ar</p>
       <p>Nombre de commandes payées : {{ totalCommandesPaid }}</p>
       <p>Nombre total de plats vendus/servis : {{ totalPlats }}</p>
-      <label for="year-select">Choisir une année :</label>
-      <select id="year-select" v-model="selectedYear">
-        <option v-for="year in [2023, 2024, 2025]" :key="year" :value="year">{{ year }}</option>
-      </select>
-      <Bar :data="{
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [{
-          label: 'Nombre de plats servis',
-          backgroundColor: '#42A5F5',
-          data: monthlyData
-        }]
-      }"/>
+      
+      <!-- <Bar :data="filteredDataChart" /> -->
     </div>
   </div>
 </template>
@@ -121,23 +130,6 @@ p {
   color: #555;
   margin-bottom: 20px;
   text-align: center;
-}
-
-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
-  color: #444;
-}
-
-select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  box-sizing: border-box;
 }
 
 canvas {
